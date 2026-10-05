@@ -1,50 +1,37 @@
-# AutoWirelessAdb · Android Auto & Wireless ADB Automation 🚗⚡
+# AutoWirelessAdb
 
-> **Automotive power management, wireless ADB automation, and Android Auto launcher for Android 7 tablets.**
+Background utility for Android tablets used as in-car head units. Handles vehicle ignition power events, keeps ADB available over Wi-Fi, and updates outdated system root certificates on older Android versions.
 
-## Overview
+## What it does
 
-**AutoWirelessAdb (`com.car.autowirelessadb`)** is a dedicated background service and automotive controller for Android tablets mounted in vehicles (such as Benesse Challenge Pad 3 / MT8167B). It automates the tablet's lifecycle in sync with the vehicle's ignition and powers Android Auto (via Headunit Reloaded) with zero manual intervention.
+- Detects charger connection (`ACTION_POWER_CONNECTED`). Wakes the screen and launches Headunit Reloaded for Android Auto when the car starts.
+- Puts the screen to sleep when power is disconnected to prevent draining the tablet battery while parked.
+- Starts the ADB daemon on TCP port 5555 on boot via root, allowing wireless debugging without plugging into a computer.
+- Unpacks updated Mozilla / Let's Encrypt root certificates (`cacerts.tar.gz`) into `/system/etc/security/cacerts` so Android 7 devices can connect to modern HTTPS endpoints.
 
----
+## Building from source
 
-## Features
+Requirements:
+- JDK 8 or higher
+- Android SDK build tools
+- Android API 24 platform
 
-1. **Auto Ignition Wake & Sleep**:
-   - Listens for vehicle power events (`ACTION_POWER_CONNECTED` / `ACTION_POWER_DISCONNECTED`).
-   - Wakes screen, sets full brightness, and launches Android Auto (Headunit Reloaded) on ignition turn-on.
-   - Puts tablet to sleep and dims screen on ignition turn-off to conserve vehicle battery.
-2. **Persistent Wireless ADB (Port 5555)**:
-   - Uses embedded `mtk-su` root privileges to persist `setprop service.adb.tcp.port 5555` and restart `adbd`.
-   - Allows completely wireless debugging, app deployment, and shell access inside the vehicle.
-3. **Automated Root CA Certificate Updates**:
-   - Injects modern system root certificates (`cacerts.tar.gz`) into `/system/etc/security/cacerts` on Android 7 devices, fixing expired Let's Encrypt / modern HTTPS connections across all apps.
-4. **Automotive Dark UI & Quick Controls**:
-   - Clean dark-mode dashboard with instant buttons for enabling Wireless ADB, updating certificates, boosting CPU governor, and toggling screen sleep.
-
----
-
-## Building from Source
-
-Prerequisites:
-- JDK 8 or JDK 17/21
-- Android Build-Tools (AAPT, D8, Zipalign, Apksigner)
-- Android SDK Platform `android-24`
+Run the build script:
 
 ```powershell
 .\build.ps1
 ```
-The output APK is generated at `AutoWirelessADB.apk`.
 
-To install to an attached device:
+The compiled package is saved as `AutoWirelessADB.apk`.
+
+Install it via ADB:
+
 ```powershell
 adb install -r AutoWirelessADB.apk
 adb shell "appops set com.car.autowirelessadb WRITE_SETTINGS allow"
 ```
 
----
-
 ## License
 
-GNU General Public License v3.0 (GPL-3.0).
+GPL-3.0.
 Android Auto is a trademark of Google LLC.
